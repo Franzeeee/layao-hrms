@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/Home.vue'
 import Rooms from '@/views/Rooms.vue'
+import Book from '@/views/Book.vue'
 
 import '../assets/css/main.css'
 import RoomDetails from '@/views/RoomDetails.vue'
@@ -31,6 +32,14 @@ const router = createRouter({
         title: 'LaYao Beach Resort - Room Details',
       },
       component: RoomDetails,
+    },
+    {
+      path: '/book',
+      name: 'book',
+      meta: {
+        title: 'LaYao Beach Resort - Book',
+      },
+      component: Book,
     },
   ],
 })

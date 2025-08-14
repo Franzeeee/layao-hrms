@@ -10,7 +10,7 @@ const router = useRouter()
 const menuItems = [
   { label: 'Home', to: '/', routeNames: ['home'] },
   { label: 'Rooms', to: '/rooms', routeNames: ['rooms', 'room-details'] },
-  { label: 'Book', to: '#', routeNames: [] },
+  { label: 'Book', to: '/book', routeNames: ['book'] },
   { label: 'Gallery', to: '#', routeNames: [] },
   { label: 'Blog', to: '#', routeNames: [] },
   { label: 'Contact', to: '#', routeNames: [] },
