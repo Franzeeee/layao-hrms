@@ -4,8 +4,8 @@
     <div class="lg:w-2/3 w-full">
       <TabContainer
         :tabs="[
-          { label: 'Cart Summary', slot: 'summary' },
-          { label: 'Rooms', slot: 'rooms' },
+          { label: 'Reservation Summary', slot: 'summary' },
+          { label: 'Rooms Information', slot: 'rooms' },
         ]"
       >
         <template #summary>

@@ -20,7 +20,7 @@
         v-model="rooms"
         item-key="id"
         group="rooms"
-        class="flex flex-col flex-1 gap-4 w-full place-items-center overflow-y-auto max-h-[700px]"
+        class="flex flex-col flex-1 gap-4 w-full place-items-center overflow-y-auto"
       >
         <template #item="{ element }">
           <RoomCard :room="element" />
@@ -39,7 +39,7 @@
         <DraggableCalendar
           :bookedRooms="getInitialSelectedDates"
           ref="calendarRef"
-          :rooms="rooms"
+          :rooms="rooms.map((room) => ({ id: String(room.id), name: room.type }))"
           :startDate="new Date().toISOString().slice(0, 10)"
           :numberOfDays="dateRange"
           :unavailable="unavailableDates"
@@ -53,12 +53,12 @@
   <!-- Always show card-based view on mobile or when bookingType is not calendar -->
   <div
     v-else
-    class="grid place-items-center grid-cols-1 md:grid-cols-2 gap-3 text-white rounded-md md:place-items-center flex-col items-center lg:flex lg:flex-row lg:justify-center"
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-white rounded-md place-items-center"
   >
     <RoomDateRangeCard
       v-for="room in rooms"
       :key="room.id"
-      :room="room"
+      :room="{ id: String(room.id), name: room.type }"
       :bookings="bookings.filter((b) => b.roomId === Number(room.id))"
       @update:selected="handleCardDataSelected"
     />
@@ -72,6 +72,7 @@ import RoomCard from '@/components/booking/RoomCard.vue'
 import Controls from '../Controls.vue'
 import draggable from 'vuedraggable'
 import RoomDateRangeCard from '@/components/booking/RoomDateRangeCard.vue'
+import { MOCK_ROOM_TYPES } from '@/data/Rooms'
 
 defineProps<{
   bookings: Array<{
@@ -94,6 +95,7 @@ const emit = defineEmits<{
       endDate: string
       dates: string[]
       guests?: number
+      rate?: number
     },
   ): void
   (
@@ -105,17 +107,13 @@ const emit = defineEmits<{
       endDate: string
       dates: string[]
       guests?: number
+      rate?: number
     },
   ): void
   (e: 'remove-room-dates', payload: { roomId: number }): void
 }>()
 
-const rooms = ref([
-  { id: '1', name: 'Deluxe Room' },
-  { id: '2', name: 'Suite' },
-  { id: '3', name: 'Standard Room' },
-])
-
+const rooms = ref(MOCK_ROOM_TYPES)
 const unavailableDates = ref([
   { roomId: '1', dates: ['2025-07-21', '2025-07-22'] },
   { roomId: '2', dates: ['2025-07-23'] },
@@ -185,11 +183,12 @@ const handleSelected = (data: Record<string, string[]>) => {
       const endDate = dates[dates.length - 1]
       emit('add-room-dates', {
         roomid: Number(roomId),
-        roomName: rooms.value.find((r) => r.id === roomId)?.name || '',
+        roomName: rooms.value.find((r) => String(r.id) === roomId)?.type || '',
         startDate,
         endDate,
         dates,
         guests: undefined,
+        rate: rooms.value.find((r) => String(r.id) === roomId)?.rate,
       })
     } else {
       emit('remove-room-dates', { roomId: Number(roomId) })
@@ -204,12 +203,36 @@ const handleCardDataSelected = (data: {
   endDate: string
   dates: string[]
   guests?: number
+  rate?: number
 }) => {
-  const existing = selectedDates.value[data.roomid]
+  // Use a string key because selectedDates keys are strings
+  const key = String(data.roomid)
+  const existing = selectedDates.value[key]
+
+  // Find room by id to reliably get the rate
+  const room = rooms.value.find((r) => String(r.id) === key)
+  const resolvedRate = data.rate ?? room?.rate
+
   if (existing) {
-    emit('update-room-dates', data)
+    emit('update-room-dates', {
+      roomid: data.roomid,
+      roomName: data.roomName,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      dates: data.dates,
+      guests: data.guests,
+      rate: resolvedRate,
+    })
   } else {
-    emit('add-room-dates', data)
+    emit('add-room-dates', {
+      roomid: data.roomid,
+      roomName: data.roomName,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      dates: data.dates,
+      guests: data.guests,
+      rate: resolvedRate,
+    })
   }
 }
 </script>

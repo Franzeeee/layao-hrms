@@ -5,10 +5,10 @@
       class="flex transition-transform duration-300 ease-in-out"
       :style="{ transform: `translateX(-${currentIndex * containerWidth}px)` }"
     >
-      <div v-for="room in rooms" :key="room.id" class="flex-shrink-0 w-full">
+      <div v-for="room in rooms" :key="room.roomName" class="flex-shrink-0 w-full">
         <div class="rounded-xl p-2 text-center">
-          <RoomGallery v-bind="roomGalleryProps" />
-          <RoomInfo v-bind="roomInfoProps" />
+          <RoomGallery v-bind="room.roomGallery" />
+          <RoomInfo v-bind="room.roomInfo" />
         </div>
       </div>
     </div>
@@ -37,22 +37,40 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import RoomGallery from '@/components/room_details/RoomGalery.vue'
 import RoomInfo from '@/components/room_details/RoomInfo.vue'
+import { useBookingDetails } from '@/store/bookingDetails'
+import { MOCK_ROOM_TYPES } from '@/data/Rooms'
 
 const currentIndex = ref(0)
 const container = ref<HTMLDivElement | null>(null)
 const containerWidth = ref(0)
 
-const rooms = [
-  { id: '1', name: 'Deluxe Room' },
-  { id: '2', name: 'Standard Room' },
-  { id: '3', name: 'Suite' },
-  { id: '4', name: 'Presidential Room' },
-  { id: '5', name: 'Economy Room' },
-]
+const roomTypes = MOCK_ROOM_TYPES
+const bookingDetails = useBookingDetails()
+const rooms = bookingDetails.bookedRooms.map((room) => {
+  const type = roomTypes.find((rt) => rt.id === room.roomId)
+  return {
+    ...room,
+    roomType: type,
+    roomGallery: {
+      images: type?.images || [],
+    },
+    roomInfo: {
+      title: type?.type ?? '',
+      description: type?.description ?? '',
+      amenities: type?.amenities || [],
+      descriptionItems: type?.inclusions || [],
+    },
+  }
+})
 
 const roomGalleryProps = {
-  images: ['/images/room-sample.jpg', '/images/carousel1.jpg'],
+  images: rooms
+    .map((room) => room.roomType?.images)
+    .flat()
+    .filter((img): img is string => typeof img === 'string'),
 }
+
+console.log(roomGalleryProps)
 
 const roomInfoProps = {
   title: 'Beach Villa Suite',

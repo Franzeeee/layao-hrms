@@ -26,7 +26,7 @@
       <button
         v-for="date in daysInMonth"
         :key="date"
-        class="p-2 rounded-lg hover:bg-primary-100"
+        class="p-2 hover:bg-primary-100"
         :class="[
           isSelectedStart(date) || isSelectedEnd(date) ? 'bg-blue-500 text-white font-bold' : '',
           isInHoverRange(date) ? 'bg-blue-100 text-blue-800' : '',
@@ -79,7 +79,11 @@ const isSelectedEnd = (date: number) => rangeEnd.value === getDateString(date)
 const isInRange = (date: number) => {
   const d = getDateString(date)
   if (rangeStart.value && rangeEnd.value) {
-    return dayjs(d).isAfter(rangeStart.value) && dayjs(d).isBefore(rangeEnd.value)
+    return (
+      dayjs(d).isSame(rangeStart.value, 'day') ||
+      dayjs(d).isSame(rangeEnd.value, 'day') ||
+      (dayjs(d).isAfter(rangeStart.value) && dayjs(d).isBefore(rangeEnd.value))
+    )
   }
   return false
 }
@@ -89,10 +93,19 @@ const isInHoverRange = (date: number) => {
   if (isDragging.value && rangeStart.value && hoverDate.value) {
     const start = dayjs(rangeStart.value)
     const hover = dayjs(hoverDate.value)
+
     if (hover.isAfter(start)) {
-      return dayjs(d).isAfter(start) && dayjs(d).isBefore(hover)
+      return (
+        dayjs(d).isSame(start, 'day') ||
+        dayjs(d).isSame(hover, 'day') ||
+        (dayjs(d).isAfter(start) && dayjs(d).isBefore(hover))
+      )
     } else {
-      return dayjs(d).isAfter(hover) && dayjs(d).isBefore(start)
+      return (
+        dayjs(d).isSame(hover, 'day') ||
+        dayjs(d).isSame(start, 'day') ||
+        (dayjs(d).isAfter(hover) && dayjs(d).isBefore(start))
+      )
     }
   }
   return false

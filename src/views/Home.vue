@@ -6,6 +6,7 @@ import ProductCard from '@/components/ProductCard.vue'
 import ImageCarousel from '@/components/ImageCarousel.vue'
 import InformationCard from '../components/InformationCard.vue'
 import HotelMap from '@/components/HotelMap.vue'
+import { useBookingDetails } from '@/store/bookingDetails'
 
 const images = ['/images/carousel1.jpg', '/images/carousel1.jpg', '/images/carousel1.jpg']
 </script>

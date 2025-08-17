@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, defineExpose } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -21,12 +21,21 @@ type BookingData = {
   endDate: string
   dates: string[]
   guests?: number
+  rate?: number
 }
 
 // Emits for date selection
 const emit = defineEmits<{
   (e: 'update:selected', data: BookingData): void
+  (e: 'clear-all'): void
 }>()
+
+const clearAllDates = () => {
+  startDate.value = ''
+  endDate.value = ''
+}
+
+defineExpose({ clearAllDates })
 
 library.add(faCalendarAlt)
 
@@ -67,14 +76,6 @@ const handleDateSelect = (dates: { start: string; end: string }) => {
     endDate: endDate.value,
     dates: dateList,
     guests: 0,
-  })
-
-  console.log('Selected Dates:', {
-    roomId: activeRoomId.value,
-    roomName: props.room.name,
-    startDate: startDate.value,
-    endDate: endDate.value,
-    dates: dateList,
   })
 }
 

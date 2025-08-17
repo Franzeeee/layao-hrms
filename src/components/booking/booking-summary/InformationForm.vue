@@ -1,20 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useBookingDetails } from '@/store/bookingDetails'
 
-const form = ref({
-  firstName: '',
-  lastName: '',
-  email: '',
-  contact: '',
-  startDate: '',
-  endDate: '',
-  guests: 1,
-  additionalPerson: '',
-  notes: '',
-})
+const bookingDetails = useBookingDetails()
 
 // const guestOptions = [1, 2, 3, 4, 5];
-const additionalOptions = [1]
+const additionalOptions = [1, 2, 3, 4]
 </script>
 
 <template>
@@ -34,7 +25,7 @@ const additionalOptions = [1]
       <div class="w-1/2">
         <!-- <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label> -->
         <input
-          v-model="form.firstName"
+          v-model="bookingDetails.firstname"
           type="text"
           class="w-full border border-gray-300 px-4 py-2 rounded-l focus:outline-none focus:ring-1 focus:ring-[#c4a164]"
           placeholder="First Name"
@@ -43,7 +34,7 @@ const additionalOptions = [1]
       <div class="w-1/2">
         <!-- <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label> -->
         <input
-          v-model="form.lastName"
+          v-model="bookingDetails.lastname"
           type="text"
           class="w-full border border-gray-300 px-4 py-2 rounded-r focus:outline-none focus:ring-1 focus:ring-[#c4a164]"
           placeholder="Last Name"
@@ -55,7 +46,7 @@ const additionalOptions = [1]
     <div class="px-5">
       <!-- <label class="block text-sm font-medium text-gray-700 mb-1">Email</label> -->
       <input
-        v-model="form.email"
+        v-model="bookingDetails.email"
         type="email"
         class="w-full border border-gray-300 px-4 py-2 focus:outline-none focus:ring-1 focus:ring-[#c4a164]"
         placeholder="Enter Your Email Address"
@@ -66,7 +57,7 @@ const additionalOptions = [1]
     <div class="px-5">
       <!-- <label class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label> -->
       <input
-        v-model="form.contact"
+        v-model="bookingDetails.phone"
         type="text"
         class="w-full border border-gray-300 px-4 py-2 focus:outline-none focus:ring-1 focus:ring-[#c4a164]"
         placeholder="Enter Your Contact Number"
@@ -87,10 +78,11 @@ const additionalOptions = [1]
     <!-- Additional Person -->
     <div class="px-5">
       <select
-        v-model="form.additionalPerson"
+        v-model="bookingDetails.additionalJoiners"
         class="w-full border border-gray-300 px-4 py-2 focus:outline-none focus:ring-1 focus:ring-[#c4a164]"
       >
-        <option disabled value="">Additional Person</option>
+        <option disabled default value="0">Additional Person (₱999/Pax)</option>
+        <option value="0">None</option>
         <option v-for="option in additionalOptions" :key="option" :value="option">
           {{ option }}
         </option>
@@ -101,7 +93,7 @@ const additionalOptions = [1]
     <div class="px-5">
       <!-- <label class="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label> -->
       <textarea
-        v-model="form.notes"
+        v-model="bookingDetails.notes"
         rows="3"
         class="w-full border border-gray-300 px-4 py-2 focus:outline-none focus:ring-1 focus:ring-[#c4a164]"
         placeholder="Any additional notes or requests..."

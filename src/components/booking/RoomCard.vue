@@ -5,7 +5,7 @@
       <div
         class="overlay absolute bottom-0 left-0 w-full bg-black bg-opacity-40 text-white p-4 box-border"
       >
-        <h3 class="m-0 text-lg font-semibold">{{ props.room.name }}</h3>
+        <h3 class="m-0 text-lg font-semibold">{{ props.room.type }}</h3>
       </div>
     </div>
   </div>
@@ -17,7 +17,7 @@ import { defineProps } from 'vue'
 const props = defineProps<{
   room: {
     id: string
-    name: string
+    type: string
   }
 }>()
 </script>

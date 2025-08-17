@@ -7,6 +7,7 @@ export interface RoomBooking {
   endDate: string
   dates: string[]
   guests?: number
+  rate?: number
 }
 
 const bookingRef = ref<RoomBooking[]>([])
@@ -21,12 +22,13 @@ export function useBooking() {
     endDate: string,
     dates: string[],
     guests?: number,
+    rate?: number,
   ) {
     const existing = bookings.value.find((b) => b.roomId === roomId)
     if (existing) {
-      Object.assign(existing, { roomName, startDate, endDate, dates, guests })
+      Object.assign(existing, { roomName, startDate, endDate, dates, guests, rate })
     } else {
-      bookings.value.push({ roomId, roomName, startDate, endDate, dates, guests })
+      bookings.value.push({ roomId, roomName, startDate, endDate, dates, guests, rate })
     }
   }
 
