@@ -5,7 +5,10 @@
     <!-- 🔧 Controls -->
     <div class="w-full flex flex-col gap-4 items-center select-none">
       <!-- Booking Type Row -->
-      <div class="flex md:flex-row flex-col items-center justify-center gap-4 w-full">
+      <div
+        v-if="!isMobile"
+        class="flex md:flex-row flex-col items-center justify-center gap-4 w-full"
+      >
         <label class="text-sm font-medium text-gray-700">Booking Type:</label>
         <select
           class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-600"
@@ -32,9 +35,9 @@
       </div>
 
       <!-- Controls Row -->
-      <div class="flex items-center justify-center gap-4 w-full">
+      <div v-if="bookingType === 'calendar'" class="flex items-center justify-center gap-4 w-full">
         <button
-          @click="emit('clear')"
+          @click="handleClear"
           class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded flex items-center gap-2 cursor-pointer"
         >
           <i class="fa fa-times"></i>
@@ -51,6 +54,12 @@
 <script setup lang="ts">
 import { ref, defineEmits } from 'vue'
 import Legend from '@/components/booking/Legend.vue'
+import { useBooking } from '@/composables/useBooking'
+
+const handleClear = () => {
+  useBooking().bookings.value = []
+  emit('clear')
+}
 
 const emit = defineEmits<{
   (e: 'clear'): void
@@ -60,6 +69,8 @@ const emit = defineEmits<{
 
 defineProps<{
   legend: Array<{ label: string; bgColor: string }>
+  bookingType: 'calendar' | 'other'
+  isMobile: boolean
 }>()
 
 const selectedDays = ref(7)

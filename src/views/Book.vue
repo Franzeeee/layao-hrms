@@ -14,6 +14,7 @@ import WarningModal from '@/components/ui/Modal/WarningModal.vue'
 import { useEmail } from '@/composables/useEmail'
 import { MOCK_ROOM_TYPES } from '@/data/Rooms'
 import { useEncryption } from '@/composables/useEncryption'
+import { type addRoomDates, type updateRoomDates } from '@/types'
 
 const steps = [
   { label: 'Room and Date' },
@@ -24,16 +25,9 @@ const steps = [
 const { bookings, removeBooking, updateRoomDates, addBooking } = useBooking()
 const bookingDetails = useBookingDetails()
 const { sendReservationAcknowledgement } = useEmail()
+const sendingEmail = ref(false)
 
-const handleAddRoomDates = (payload: {
-  roomid: number
-  roomName: string
-  startDate: string
-  endDate: string
-  dates: string[]
-  guests?: number
-  rate?: number
-}) => {
+const handleAddRoomDates = (payload: addRoomDates) => {
   addBooking(
     payload.roomid,
     payload.roomName,
@@ -45,14 +39,7 @@ const handleAddRoomDates = (payload: {
   )
 }
 
-const handdleUpdateRoomDates = (payload: {
-  roomid: number
-  roomName: string
-  startDate: string
-  endDate: string
-  dates: string[]
-  guests?: number
-}) => {
+const handleUpdateRoomDates = (payload: updateRoomDates) => {
   updateRoomDates(
     payload.roomid,
     payload.roomName,
@@ -96,6 +83,8 @@ const handleConfirm = async () => {
     additionalJoiner: useBookingDetails().additionalJoiners,
     total: useBookingDetails().total,
     subtotal: useBookingDetails().total,
+    notes: bookingDetails.notes || '',
+    encryptedData: '',
     bookedRooms: finalBookingData.value.bookedRooms.map((room: any) => ({
       image_url: room.image_url || room.imageUrl || '',
       roomName: room.roomName,
@@ -115,15 +104,17 @@ const handleConfirm = async () => {
       checkInDate: room.startDate || '',
       checkOutDate: room.endDate || '',
     })),
-    notes: 'Near pool area please',
   }
+
+  reservationData.encryptedData = useEncryption().encryptObject(reservationData)
+  console.log(reservationData.encryptedData)
+
+  sendingEmail.value = true
 
   await sendReservationAcknowledgement(reservationData, 'template_f843d1c')
   await sendReservationAcknowledgement(reservationData, 'template_kydzygp')
 
-  const encryptedData = useEncryption().encryptObject(reservationData)
-
-  console.log(encryptedData)
+  sendingEmail.value = false
 
   currentStep.value = currentStep.value + 1
 }
@@ -218,7 +209,7 @@ const handleModalOpen = () => {
       :bookings="bookings"
       @add-room-dates="handleAddRoomDates"
       @remove-room-dates="(payload) => removeBooking(payload.roomId)"
-      @update-room-dates="handdleUpdateRoomDates"
+      @update-room-dates="handleUpdateRoomDates"
     />
 
     <StepTwo v-if="currentStep === 1" />
@@ -226,20 +217,36 @@ const handleModalOpen = () => {
     <div class="w-full flex justify-between">
       <Button
         :buttonFillType="false"
-        :disabled="currentStep === steps.length - 1"
-        :isDisabled="currentStep === steps.length - 1"
-        @click="previousStep"
+        :disabled="currentStep === steps.length - 1 || sendingEmail"
+        :isDisabled="currentStep === steps.length - 1 || sendingEmail"
+        @click="!sendingEmail && previousStep()"
       >
         Previous
       </Button>
-      <Button @click="currentStep === steps.length - 2 ? handleModalOpen() : nextStep()">
+      <Button
+        :disabled="sendingEmail"
+        :isDisabled="sendingEmail"
+        @click="
+          !sendingEmail && (currentStep === steps.length - 2 ? handleModalOpen() : nextStep())
+        "
+      >
         <i
           :class="
-            currentStep === steps.length - 2 ? 'fas fa-paper-plane mr-2' : 'fas fa-arrow-right mr-2'
+            sendingEmail
+              ? 'fas fa-spinner fa-spin mr-2'
+              : currentStep === steps.length - 2
+                ? 'fas fa-paper-plane mr-2'
+                : 'fas fa-arrow-right mr-2'
           "
           aria-hidden="true"
         ></i>
-        {{ currentStep === steps.length - 2 ? 'Confirm Reservation' : 'Next' }}
+        {{
+          sendingEmail
+            ? 'Reservation in Progress...'
+            : currentStep === steps.length - 2
+              ? 'Confirm Reservation'
+              : 'Next'
+        }}
       </Button>
 
       <!-- Confirmation Modal -->

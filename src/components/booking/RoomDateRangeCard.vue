@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, defineExpose } from 'vue'
+import { ref, defineExpose, onMounted } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import ModernCalendar from '@/components/booking/ModernCalendar.vue'
 import dayjs from 'dayjs'
+import { useBooking } from '@/composables/useBooking'
 
 // Props for the room object
 const props = defineProps<{
@@ -33,9 +34,33 @@ const emit = defineEmits<{
 const clearAllDates = () => {
   startDate.value = ''
   endDate.value = ''
+
+  useBooking().bookings.value = useBooking().bookings.value.filter(
+    (b) => b.roomId.toString() !== props.room.id,
+  )
 }
 
 defineExpose({ clearAllDates })
+
+onMounted(() => {
+  const booking = useBooking().bookings.value.find((b) => b.roomId.toString() === props.room.id)
+
+  if (booking) {
+    startDate.value = booking.startDate
+    endDate.value = booking.endDate || ''
+
+    // Emit automatically so parent knows about existing booking
+    handleDataSelect({
+      roomid: Number(booking.roomId),
+      roomName: booking.roomName,
+      startDate: booking.startDate,
+      endDate: booking.endDate,
+      dates: booking.dates,
+      guests: booking.guests ?? 0,
+      rate: booking.rate,
+    })
+  }
+})
 
 library.add(faCalendarAlt)
 
@@ -157,6 +182,21 @@ const handleDataSelect = (data: BookingData) => {
         </div>
       </div>
     </div>
+
+    <button
+      v-if="startDate || endDate"
+      type="button"
+      @click="
+        () => {
+          clearAllDates()
+        }
+      "
+      class="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-lg text-sm font-medium hover:bg-red-100 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-red-200 transition"
+      aria-label="Clear booking dates"
+      title="Clear booking dates"
+    >
+      Clear dates
+    </button>
 
     <!-- Calendar Modal -->
     <div

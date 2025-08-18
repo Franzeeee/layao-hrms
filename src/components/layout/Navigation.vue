@@ -11,9 +11,9 @@ const menuItems = [
   { label: 'Home', to: '/', routeNames: ['home'] },
   { label: 'Rooms', to: '/rooms', routeNames: ['rooms', 'room-details'] },
   { label: 'Book', to: '/book', routeNames: ['book'] },
-  { label: 'Gallery', to: '#', routeNames: [] },
+  { label: 'Gallery', to: '/gallery', routeNames: ['gallery'] },
   { label: 'Blog', to: '#', routeNames: [] },
-  { label: 'Contact', to: '#', routeNames: [] },
+  { label: 'Contact', to: '/contact', routeNames: ['contact'] },
 ]
 
 // Watch scroll position

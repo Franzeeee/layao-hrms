@@ -22,6 +22,7 @@ interface ReservationData {
   total: number
   addOnTotal?: number
   additionalJoiner: number
+  encryptedData?: string
 }
 
 export function useEmail() {
@@ -123,6 +124,7 @@ export function useEmail() {
           addOnTotal: data.addOnTotal ? `₱${Number(data.addOnTotal).toLocaleString()}` : '₱0',
           contactInfo: `If you have any questions or concerns, please contact UWS.`,
           additionalJoiner: data.additionalJoiner,
+          encryptedData: data.encryptedData || '',
         },
         'xsvi8L3B4ff5HoCd_', // EmailJS Public Key
       )

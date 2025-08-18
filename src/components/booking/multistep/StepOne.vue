@@ -1,6 +1,8 @@
 <template>
   <div class="w-full">
     <Controls
+      :isMobile="isMobile"
+      :bookingType="bookingType"
       @change-days="updateDays"
       @clear="clearSelection"
       @change-booking-type="changeBookingType"

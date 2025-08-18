@@ -6,6 +6,15 @@ const bookingDetails = useBookingDetails()
 
 // const guestOptions = [1, 2, 3, 4, 5];
 const additionalOptions = [1, 2, 3, 4]
+
+function onPhoneKeypress(e: KeyboardEvent) {
+  const target = e.target as HTMLInputElement | null
+  const key = e.key
+  if (!target) return
+  if (!/[0-9+]/.test(key) || (key === '+' && target.selectionStart !== 0)) {
+    e.preventDefault()
+  }
+}
 </script>
 
 <template>
@@ -53,15 +62,22 @@ const additionalOptions = [1, 2, 3, 4]
       />
     </div>
 
-    <!-- Contact -->
     <div class="px-5">
-      <!-- <label class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label> -->
+      <!-- <label class="block text-sm font-medium text-gray-700 mb-1">Email</label> -->
       <input
         v-model="bookingDetails.phone"
-        type="text"
-        class="w-full border border-gray-300 px-4 py-2 focus:outline-none focus:ring-1 focus:ring-[#c4a164]"
+        type="tel"
+        inputmode="tel"
+        pattern="^(?:\+63|0)9\d{9}$"
+        :maxlength="bookingDetails.phone && bookingDetails.phone.startsWith('+') ? 13 : 11"
+        class="w-full border border-gray-300 px-4 py-2 focus:outline-none focus:ring-1 focus:ring-[#c4a164] peer"
         placeholder="Enter Your Contact Number"
+        title="Valid formats: 09XXXXXXXXX or +639XXXXXXXXX — digits only, plus allowed only as leading char"
+        @keypress="onPhoneKeypress"
       />
+      <p class="text-xs text-gray-400 mt-1 hidden peer-focus:block">
+        Allowed: 09XXXXXXXXX or +639XXXXXXXXX
+      </p>
     </div>
 
     <!-- Guests -->

@@ -36,6 +36,7 @@
 import { ref, computed, onMounted, nextTick } from 'vue'
 import SelectionArea from '@simonwep/selection-js'
 import dayjs from 'dayjs'
+import { useBooking } from '@/composables/useBooking'
 
 const emit = defineEmits<{
   (e: 'update:selected', data: Record<string, string[]>): void
@@ -143,6 +144,24 @@ const logSelectedRooms = () => {
     console.log(`🏨 ${roomName} — Selected dates: ${sorted.join(', ')}`)
   })
 }
+
+// Highlight booked rooms on mount
+onMounted(() => {
+  console.log('Highlighting booked rooms:')
+  console.log(useBooking().bookings.value)
+  useBooking().bookings.value.forEach((booking) => {
+    const roomId = booking.roomId.toString()
+    if (!bookedRoomDates.value[roomId]) {
+      bookedRoomDates.value[roomId] = []
+    }
+    bookedRoomDates.value[roomId].push(...booking.dates)
+
+    // Also mark as selected
+    booking.dates.forEach((date) => {
+      selected.value.add(`${roomId}_${date}`)
+    })
+  })
+})
 
 // Mount drag interaction if enabled
 onMounted(async () => {
