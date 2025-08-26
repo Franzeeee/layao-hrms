@@ -118,6 +118,7 @@ const handleConfirm = async () => {
 
   sendingEmail.value = false
   bookingDetails.resetBookingDetails()
+  bookings.value = []
 
   currentStep.value = currentStep.value + 1
 }
