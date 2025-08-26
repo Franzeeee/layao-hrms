@@ -12,7 +12,7 @@ const menuItems = [
   { label: 'Rooms', to: '/rooms', routeNames: ['rooms', 'room-details'] },
   { label: 'Book', to: '/book', routeNames: ['book'] },
   { label: 'Gallery', to: '/gallery', routeNames: ['gallery'] },
-  { label: 'Blog', to: '#', routeNames: [] },
+  // { label: 'Blog', to: '#', routeNames: [] },
   { label: 'Contact', to: '/contact', routeNames: ['contact'] },
 ]
 

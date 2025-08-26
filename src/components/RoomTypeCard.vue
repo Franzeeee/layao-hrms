@@ -81,7 +81,9 @@ const featureIconMap: Record<string, string> = {
     <div class="bg-gray-100 flex flex-col items-center justify-around gap-2 md:gap-0 py-4 md:py-0">
       <div>
         <h1 class="text-4xl text-gray-500">₱{{ props.rate.toLocaleString() }}</h1>
-        <p class="uppercase text-gray-400 text-sm mt-2">Per night</p>
+        <p class="uppercase text-gray-400 text-sm mt-2">
+          {{ props.title.includes('Barkadahan') ? 'Per Pax' : 'Per night' }}
+        </p>
       </div>
       <div>
         <router-link
