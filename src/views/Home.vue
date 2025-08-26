@@ -6,8 +6,11 @@ import ProductCard from '@/components/ProductCard.vue'
 import ImageCarousel from '@/components/ImageCarousel.vue'
 import InformationCard from '../components/InformationCard.vue'
 import HotelMap from '@/components/HotelMap.vue'
+import { MOCK_DATA_IMAGES } from '@/data/ImageCarousel'
+import { MOCK_ROOM_TYPES } from '@/data/Rooms'
 
-const images = ['/images/carousel1.jpg', '/images/carousel1.jpg', '/images/carousel1.jpg']
+const images: string[] = MOCK_DATA_IMAGES.map((image) => image.url)
+const rooms = MOCK_ROOM_TYPES.slice(0, 3)
 </script>
 
 <!-- src/pages/HomePage.vue -->
@@ -28,12 +31,18 @@ const images = ['/images/carousel1.jpg', '/images/carousel1.jpg', '/images/carou
     description="Enjoy your stay at our finest rooms. To accommodate the guests who want to have an overnight stay, the resort has 4 beach villas and 15 hotel rooms to choose from, at different prices according to the level of standard of accommodation."
     :cols="3"
   >
-    <ProductCard />
-    <ProductCard />
-    <ProductCard />
+    <ProductCard
+      v-for="room in rooms"
+      :id="room.id"
+      :key="room.id"
+      :name="room.type"
+      :type="room.type"
+      :price="`₱${room.rate}.00`"
+      :image="room.images?.[0]"
+    />
 
     <div class="w-full col-span-3 p-2 grid items-center">
-      <RouterLink to="#">
+      <RouterLink to="/rooms">
         <button
           class="w-fit m-auto text-center text-sm text-[#c4a164] cursor-pointer border border-[#c4a164] hover:bg-[#c4a164] hover:text-white transition-all duration-300 ease-in-out p-2 px-3 uppercase"
         >

@@ -9,23 +9,35 @@ import PriceBreakdown from '@/components/PriceBreakdown.vue'
 import BookingInformation from '@/components/BookingInformation.vue'
 import SimilarRoomCard from '@/components/SimilarRoomCard.vue'
 import BookReservationButton from '@/components/BookReservationButton.vue'
+import { MOCK_ROOM_TYPES } from '@/data/Rooms'
+import { useRoute } from 'vue-router'
+import { computed } from 'vue'
 
+const route = useRoute()
+const id = computed(() => Number(route.params.id ?? NaN))
+
+const room = MOCK_ROOM_TYPES.find((room) => room.id === id.value)
+
+console.log(id.value)
 const heroBannerProps = {
   title: 'Our Rooms',
   breadcrumbs: [
     { text: 'Home', link: '/' },
     { text: 'Rooms', link: '/rooms' },
-    { text: 'Room Details' },
+    { text: room?.type ?? '' },
   ],
   backgroundImage: '/images/hero-img.jpg',
 }
 
 const roomGalleryProps = {
-  images: ['/images/room-sample.jpg', '/images/carousel1.jpg'],
+  images:
+    room?.images && room.images.length > 0
+      ? room.images
+      : ['/images/room-sample.jpg', '/images/carousel1.jpg'],
 }
 
 const roomInfoProps = {
-  title: 'Beach Villa Suite',
+  title: room?.type ?? 'Room Name',
   description: `An elegant fusion between European and Filipino design, this two-level villa is provided with two balconies and has the perfect panoramic view of the spectacular rock formations of the island. The ground floor has 1 queen sized bed, 1 queen-sized pull-out bed, and the loft has 1 single bed. Ideal for families and larger groups.`,
   amenities: [
     'Breakfast for 5 persons',
