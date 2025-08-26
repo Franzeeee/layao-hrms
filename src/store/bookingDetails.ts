@@ -34,5 +34,17 @@ export const useBookingDetails = defineStore('bookingDetails', {
     setNotes(notes: string) {
       this.notes = notes
     },
+    resetBookingDetails() {
+      this.additionalJoiners = 0
+      this.firstname = ''
+      this.lastname = ''
+      this.email = ''
+      this.phone = ''
+      this.notes = ''
+      this.bookedRooms = []
+      this.total = 0
+      this.addOnTotal = 0
+      this.roomQuantity = []
+    },
   },
 })
