@@ -7,6 +7,8 @@ import Button from '@/components/ui/Button/Button.vue'
 import StepOne from '@/components/booking/multistep/StepOne.vue'
 import { ref, onMounted, watch } from 'vue'
 import StepTwo from '@/components/booking/multistep/StepTwo.vue'
+// @ts-ignore: module has no declaration file
+import StepThree from '@/components/booking/multistep/StepThree.vue'
 import { useBooking } from '../composables/useBooking'
 import { useBookingDetails } from '@/store/bookingDetails'
 import ConfirmationModal from '@/components/ui/Modal/ConfirmationModal.vue'
@@ -115,6 +117,7 @@ const handleConfirm = async () => {
   await sendReservationAcknowledgement(reservationData, 'template_kydzygp')
 
   sendingEmail.value = false
+  bookingDetails.resetBookingDetails()
 
   currentStep.value = currentStep.value + 1
 }
@@ -214,8 +217,11 @@ const handleModalOpen = () => {
 
     <StepTwo v-if="currentStep === 1" />
 
+    <StepThree v-if="currentStep === 2" />
+
     <div class="w-full flex justify-between">
       <Button
+        v-if="currentStep !== steps.length - 1"
         :buttonFillType="false"
         :disabled="currentStep === steps.length - 1 || sendingEmail"
         :isDisabled="currentStep === steps.length - 1 || sendingEmail"
@@ -224,36 +230,46 @@ const handleModalOpen = () => {
         Previous
       </Button>
       <Button
+        v-if="currentStep !== steps.length - 1"
         :disabled="sendingEmail"
         :isDisabled="sendingEmail"
         @click="
-          !sendingEmail && (currentStep === steps.length - 2 ? handleModalOpen() : nextStep())
+          !sendingEmail &&
+          (currentStep === steps.length - 1
+            ? (currentStep = 0)
+            : currentStep === steps.length - 2
+              ? handleModalOpen()
+              : nextStep())
         "
       >
         <i
           :class="
             sendingEmail
               ? 'fas fa-spinner fa-spin mr-2'
-              : currentStep === steps.length - 2
-                ? 'fas fa-paper-plane mr-2'
-                : 'fas fa-arrow-right mr-2'
+              : currentStep === steps.length - 1
+                ? 'fas fa-check mr-2'
+                : currentStep === steps.length - 2
+                  ? 'fas fa-paper-plane mr-2'
+                  : 'fas fa-arrow-right mr-2'
           "
           aria-hidden="true"
         ></i>
         {{
           sendingEmail
             ? 'Reservation in Progress...'
-            : currentStep === steps.length - 2
-              ? 'Confirm Reservation'
-              : 'Next'
+            : currentStep === steps.length - 1
+              ? 'Okay'
+              : currentStep === steps.length - 2
+                ? 'Confirm Inquiry'
+                : 'Next'
         }}
       </Button>
 
       <!-- Confirmation Modal -->
       <ConfirmationModal
         :visible="showModal"
-        title="Confirm Booking?"
-        message="Are you sure you want to confirm this booking?"
+        title="Confirm Inquiry?"
+        message="Are you sure you want to confirm this inquiry?"
         @confirm="handleConfirm"
         @cancel="showModal = false"
       />
