@@ -12,6 +12,7 @@ const props = defineProps<{
   room: {
     id: string
     name: string
+    images?: string[]
   }
 }>()
 
@@ -174,7 +175,7 @@ const handleDataSelect = (data: BookingData) => {
     <!-- Image on Top -->
     <div class="mb-4">
       <img
-        src="/images/beach-villa-suite.jpg"
+        :src="room.images?.[0] || '/images/beach-villa-suite.jpg'"
         alt="Beach Villa Suite Image"
         class="w-full h-40 object-cover rounded-lg min-h-56 md:min-h-50"
       />

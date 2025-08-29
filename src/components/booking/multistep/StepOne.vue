@@ -60,7 +60,7 @@
     <RoomDateRangeCard
       v-for="room in rooms"
       :key="room.id"
-      :room="{ id: String(room.id), name: room.type }"
+      :room="{ id: String(room.id), name: room.type, images: room.images }"
       :bookings="bookings.filter((b) => b.roomId === Number(room.id))"
       @update:selected="handleCardDataSelected"
     />
