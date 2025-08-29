@@ -29,9 +29,11 @@ const rooms = MOCK_ROOM_TYPES.slice(0, 3)
   <FeatureSection
     title="Discover Our Unique Rooms"
     description="Enjoy your stay at our finest rooms. To accommodate the guests who want to have an overnight stay, the resort has 4 beach villas and 15 hotel rooms to choose from, at different prices according to the level of standard of accommodation."
-    :cols="3"
-  >
-    <ProductCard
+    :disableGrid="true"
+    >
+    <!-- custom responsive grid just for rooms -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full justify-items-center">
+      <ProductCard
       v-for="room in rooms"
       :id="room.id"
       :key="room.id"
@@ -39,8 +41,11 @@ const rooms = MOCK_ROOM_TYPES.slice(0, 3)
       :type="room.type"
       :price="`₱${room.rate}.00`"
       :image="room.images?.[0]"
-    />
+      class="w-full"
+      />
+    </div>
 
+    <!-- button row stays below -->
     <div class="w-full col-span-3 p-2 grid items-center">
       <RouterLink to="/rooms">
         <button
@@ -51,6 +56,7 @@ const rooms = MOCK_ROOM_TYPES.slice(0, 3)
       </RouterLink>
     </div>
   </FeatureSection>
+
 
   <FeatureSection
     title="OUR AWESOME SERVICES"

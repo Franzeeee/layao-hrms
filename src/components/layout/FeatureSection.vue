@@ -22,6 +22,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  disableGrid: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 // Computed class with known variants so Tailwind can detect them:
@@ -57,7 +61,10 @@ const gridColsClass = computed(() => {
         {{ props.description }}
       </p>
 
-      <div class="grid gap-6 auto-rows-auto" :class="gridColsClass">
+      <div v-if="!props.disableGrid" class="grid gap-6 auto-rows-auto" :class="gridColsClass">
+        <slot />
+      </div>
+      <div v-else>
         <slot />
       </div>
     </div>
