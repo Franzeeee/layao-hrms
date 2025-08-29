@@ -26,16 +26,18 @@
       <button
         v-for="date in daysInMonth"
         :key="date"
-        class="p-2 hover:bg-primary-100"
+        class="p-2 hover:bg-primary-100 transition-colors duration-150"
         :class="[
           isSelectedStart(date) || isSelectedEnd(date) ? 'bg-blue-500 text-white font-bold' : '',
           isInHoverRange(date) ? 'bg-blue-100 text-blue-800' : '',
           isInRange(date) ? 'bg-blue-50 text-blue-700' : '',
           isToday(date) ? 'bg-gray-200 text-gray-900' : '',
+          'hover:bg-blue-100',
         ]"
         @mousedown.prevent="startDrag(date)"
         @mouseenter="onHover(date)"
         @mouseup.prevent="endDrag(date)"
+        @click.stop="handleClick(date)"
       >
         {{ date }}
       </button>
@@ -44,8 +46,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import dayjs from 'dayjs'
+
+const props = defineProps<{
+  initialStart?: string
+  initialEnd?: string
+}>()
 
 const emit = defineEmits(['select'])
 
@@ -64,10 +71,26 @@ const blankDays = computed(() => {
 })
 
 // State
-const rangeStart = ref<string | null>(null)
-const rangeEnd = ref<string | null>(null)
+const rangeStart = ref<string | null>(props.initialStart || null)
+const rangeEnd = ref<string | null>(props.initialEnd || null)
 const isDragging = ref(false)
 const hoverDate = ref<string | null>(null)
+const dragStarted = ref(false)
+
+// Watch for prop changes
+watch(
+  () => props.initialStart,
+  (newStart) => {
+    rangeStart.value = newStart || null
+  },
+)
+
+watch(
+  () => props.initialEnd,
+  (newEnd) => {
+    rangeEnd.value = newEnd || null
+  },
+)
 
 const getDateString = (date: number) => current.value.date(date).format('YYYY-MM-DD')
 
@@ -111,8 +134,31 @@ const isInHoverRange = (date: number) => {
   return false
 }
 
+// Handle click - for single date selection
+const handleClick = (date: number) => {
+  // Prevent default to stop any drag behavior
+  event?.preventDefault()
+
+  // Only process click if we haven't started dragging
+  if (!isDragging.value && !dragStarted.value) {
+    const clicked = getDateString(date)
+
+    // Reset any drag state
+    isDragging.value = false
+    dragStarted.value = false
+    hoverDate.value = null
+
+    // Emit single date selection
+    emit('select', {
+      start: clicked,
+      end: null,
+    })
+  }
+}
+
 // Events for drag
 const startDrag = (date: number) => {
+  dragStarted.value = false
   rangeStart.value = getDateString(date)
   rangeEnd.value = null
   hoverDate.value = null
@@ -122,29 +168,38 @@ const startDrag = (date: number) => {
 const onHover = (date: number) => {
   if (isDragging.value) {
     hoverDate.value = getDateString(date)
+    dragStarted.value = true // Mark as drag if hovering while mouse down
   }
 }
 
 const endDrag = (date: number) => {
   if (!isDragging.value) return
-  const end = getDateString(date)
 
-  if (rangeStart.value) {
-    if (dayjs(end).isBefore(rangeStart.value)) {
-      rangeEnd.value = rangeStart.value
-      rangeStart.value = end
-    } else {
-      rangeEnd.value = end
+  // Only process as drag if we actually dragged
+  if (dragStarted.value) {
+    const end = getDateString(date)
+
+    if (rangeStart.value) {
+      if (dayjs(end).isBefore(rangeStart.value)) {
+        rangeEnd.value = rangeStart.value
+        rangeStart.value = end
+      } else {
+        rangeEnd.value = end
+      }
     }
+
+    emit('select', {
+      start: rangeStart.value,
+      end: rangeEnd.value,
+    })
+  } else {
+    // If we didn't drag, this was just a click - don't emit anything here
+    // The click handler will take care of it
   }
 
   isDragging.value = false
   hoverDate.value = null
-
-  emit('select', {
-    start: rangeStart.value,
-    end: rangeEnd.value,
-  })
+  dragStarted.value = false
 }
 
 const nextMonth = () => {
