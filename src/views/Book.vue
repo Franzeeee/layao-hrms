@@ -16,7 +16,7 @@ import WarningModal from '@/components/ui/Modal/WarningModal.vue'
 import { useEmail } from '@/composables/useEmail'
 import { MOCK_ROOM_TYPES } from '@/data/Rooms'
 import { useEncryption } from '@/composables/useEncryption'
-import { type addRoomDates, type updateRoomDates } from '@/types'
+import type { addRoomDates, updateRoomDates } from '@/types/index'
 
 const steps = [
   { label: 'Room and Date' },
