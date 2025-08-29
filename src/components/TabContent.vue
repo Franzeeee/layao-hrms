@@ -170,7 +170,7 @@ const rooms = ref(
   }),
 )
 
-const roomJoinerTotal = computed(() => 999 * bookingDetails.additionalJoiners)
+const roomJoinerTotal = computed(() => 999 * bookingDetails.additionalJoiners - 1)
 // Subtotal & grand total
 const subTotal = computed(() => {
   return bookingDetails.bookedRooms.reduce((acc, item, idx) => {
