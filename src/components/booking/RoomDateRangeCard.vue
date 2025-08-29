@@ -71,10 +71,9 @@ const activeField = ref<'start' | 'end'>('start')
 const activeRoomId = ref('')
 
 const openCalendar = (field: 'start' | 'end', roomId: string) => {
-  activeRoomId.value = ''
+  activeRoomId.value = roomId
   activeField.value = field
   isCalendarOpen.value = true
-  activeRoomId.value = roomId
 }
 
 const closeCalendar = () => {
@@ -82,26 +81,73 @@ const closeCalendar = () => {
 }
 
 const handleDateSelect = (dates: { start: string; end: string }) => {
-  startDate.value = dates.start
-  endDate.value = dates.end || ''
-  closeCalendar()
+  // Handle single date selection based on active field
+  if (dates.end === null || dates.end === undefined) {
+    // Single click - update only the active field
+    if (activeField.value === 'start') {
+      startDate.value = dates.start
+    } else if (activeField.value === 'end') {
+      endDate.value = dates.start
+    }
+    closeCalendar()
 
-  // Loop out to get the list of dates from start to end
-  const start = dayjs(startDate.value)
-  const end = dayjs(endDate.value)
-  const dateList: string[] = []
-  for (let d = start; d.isBefore(end) || d.isSame(end, 'day'); d = d.add(1, 'day')) {
-    dateList.push(d.format('YYYY-MM-DD'))
+    // Only emit if both dates are available after single click
+    if (startDate.value && endDate.value) {
+      const start = dayjs(startDate.value)
+      const end = dayjs(endDate.value)
+
+      // Ensure start is before end
+      let actualStart = start
+      let actualEnd = end
+      if (end.isBefore(start)) {
+        actualStart = end
+        actualEnd = start
+        startDate.value = actualStart.format('YYYY-MM-DD')
+        endDate.value = actualEnd.format('YYYY-MM-DD')
+      }
+
+      const dateList: string[] = []
+      for (
+        let d = actualStart;
+        d.isBefore(actualEnd) || d.isSame(actualEnd, 'day');
+        d = d.add(1, 'day')
+      ) {
+        dateList.push(d.format('YYYY-MM-DD'))
+      }
+
+      // Emit the selected dates
+      handleDataSelect({
+        roomid: Number(activeRoomId.value),
+        roomName: props.room.name || '',
+        startDate: startDate.value,
+        endDate: endDate.value,
+        dates: dateList,
+        guests: 0,
+      })
+    }
+  } else {
+    // Handle range selection (drag) - this overrides both dates
+    startDate.value = dates.start
+    endDate.value = dates.end
+    closeCalendar()
+
+    // Loop out to get the list of dates from start to end
+    const start = dayjs(startDate.value)
+    const end = dayjs(endDate.value)
+    const dateList: string[] = []
+    for (let d = start; d.isBefore(end) || d.isSame(end, 'day'); d = d.add(1, 'day')) {
+      dateList.push(d.format('YYYY-MM-DD'))
+    }
+    // Emit the selected dates
+    handleDataSelect({
+      roomid: Number(activeRoomId.value),
+      roomName: props.room.name || '',
+      startDate: startDate.value,
+      endDate: endDate.value,
+      dates: dateList,
+      guests: 0,
+    })
   }
-  // Emit the selected dates
-  handleDataSelect({
-    roomid: Number(activeRoomId.value),
-    roomName: props.room.name || '',
-    startDate: startDate.value,
-    endDate: endDate.value,
-    dates: dateList,
-    guests: 0,
-  })
 }
 
 const handleDataSelect = (data: BookingData) => {
@@ -150,7 +196,7 @@ const handleDataSelect = (data: BookingData) => {
             type="text"
             v-model="startDate"
             readonly
-            class="w-full border rounded-lg p-2 pr-10 text-sm focus:outline-none focus:ring focus:ring-primary-200 text-gray-500"
+            class="w-full border rounded-lg p-2 pr-10 text-sm focus:outline-none focus:ring focus:ring-primary-200 text-gray-500 cursor-pointer"
             placeholder="e.g. 2024-06-01"
             @click="openCalendar('start', room.id)"
           />
@@ -170,7 +216,7 @@ const handleDataSelect = (data: BookingData) => {
             type="text"
             v-model="endDate"
             readonly
-            class="w-full border rounded-lg p-2 pr-10 text-sm focus:outline-none focus:ring focus:ring-primary-200 text-gray-500"
+            class="w-full border rounded-lg p-2 pr-10 text-sm focus:outline-none focus:ring focus:ring-primary-200 text-gray-500 cursor-pointer"
             placeholder="e.g. 2024-06-15"
             @click="openCalendar('end', room.id)"
           />
@@ -195,7 +241,7 @@ const handleDataSelect = (data: BookingData) => {
       aria-label="Clear booking dates"
       title="Clear booking dates"
     >
-      Clear dates
+      Clear Dates
     </button>
 
     <!-- Calendar Modal -->
@@ -205,9 +251,16 @@ const handleDataSelect = (data: BookingData) => {
       @click="closeCalendar"
     >
       <div class="bg-white p-4 rounded-xl shadow-lg min-w-[300px]" @click.stop>
-        <p class="mb-2 text-sm font-medium text-gray-600">Pick a {{ activeField }} date</p>
+        <p class="mb-2 text-sm font-medium text-gray-600">
+          Pick a {{ activeField }} date
+          <span class="text-xs text-gray-400 block">Click a date or drag to select a range</span>
+        </p>
         <div class="text-center text-sm text-gray-400 italic">
-          <ModernCalendar @select="handleDateSelect" />
+          <ModernCalendar
+            @select="handleDateSelect"
+            :initial-start="startDate"
+            :initial-end="endDate"
+          />
         </div>
       </div>
     </div>
